@@ -13,6 +13,7 @@ import module namespace templates = "http://exist-db.org/xquery/templates";
 
 declare namespace repo = "http://exist-db.org/xquery/repo";
 declare namespace expath = "http://expath.org/ns/pkg";
+declare namespace db5="http://docbook.org/ns/docbook";
 
 (:============================================================================:)
 (:== GLOBAL VARIABLES: ==:)
@@ -74,7 +75,7 @@ declare function config:expath-descriptor() as element(expath:package) {
 declare %templates:wrap function config:app-title($node as node(), $model as map(*)) as xs:string {
   let $doc-uri := request:get-uri()
   let $doc-path := concat(replace(replace($doc-uri, '^/exist/', '/db/'), concat('^(.*)', '/', '.*'), '$1'), '/data/', replace($doc-uri, concat('^.*', '/'), ''))
-  let $doc-title := doc($doc-path)/book/bookinfo/title
+  let $doc-title := doc($doc-path)/db5:article/db5:info/db5:title
   return
     concat($config:expath-descriptor/expath:title, if ($doc-title) then
       ' - '

@@ -10,6 +10,7 @@ import module namespace config="http://exist-db.org/xquery/apps/config" at "conf
 import module namespace kwic="http://exist-db.org/xquery/kwic";
 
 declare namespace templates="http://exist-db.org/xquery/templates";
+declare namespace db5="http://docbook.org/ns/docbook";
 
 declare option exist:serialize "method=html media-type=text/html expand-xincludes=yes";
 
@@ -19,7 +20,7 @@ declare variable $dq:CHARS_KWIC := 80;
 (:~
     Templating function: process the query.
 :)
-declare 
+declare
     %public %templates:default("field", "all") %templates:default("view", "summary")
 function dq:query($node as node()*, $model as map(*), $q as xs:string?, $field as xs:string, $view as xs:string) {
 	if ($q) then
@@ -44,7 +45,7 @@ function dq:query($node as node()*, $model as map(*), $q as xs:string?, $field a
 declare %private function dq:print($hit as element(), $search-params as xs:string, $view as xs:string)
 as element()* {
     let $nodeId := util:node-id($hit)
-	let $uri := util:document-name(root($hit)) || "?" || 
+	let $uri := util:document-name(root($hit)) || "?" ||
 		$search-params || "&amp;id=D" || $nodeId || "#D" || $nodeId
 	let $config :=
 		<config xmlns="" width="{if ($view eq 'summary') then $dq:CHARS_SUMMARY else $dq:CHARS_KWIC}"
@@ -53,12 +54,12 @@ as element()* {
     let $matches := kwic:get-matches($hit)
     return
         if ($view eq "kwic") then
-            for $ancestor in ($matches/ancestor::para | $matches/ancestor::title | $matches/ancestor::td | $matches/ancestor::note[not(para)])
+            for $ancestor in ($matches/ancestor::db5:para | $matches/ancestor::db5:title | $matches/ancestor::db5:td | $matches/ancestor::db5:note[not(db5:para)])
             for $match in $ancestor//exist:match
             return
-                kwic:get-summary($ancestor, $match, $config) 
+                kwic:get-summary($ancestor, $match, $config)
         else
-            let $ancestors := ($matches/ancestor::para | $matches/ancestor::title | $matches/ancestor::td | $matches/ancestor::note[not(para)])
+            let $ancestors := ($matches/ancestor::db5:para | $matches/ancestor::db5:title | $matches/ancestor::db5:td | $matches/ancestor::db5:note[not(db5:para)])
             return
                 for $ancestor in $ancestors
             return
@@ -92,12 +93,12 @@ declare %private function dq:print-headings($section as element()*, $search-para
 		util:document-name(root($section)) || "?" || $search-params || "&amp;id=D" || $nodeId
 		return
 		  <a href="{$uri}">{$section/ancestor-or-self::chapter/title/text()}</a>,
-	for $s at $p in $section/ancestor-or-self::section
+	for $s at $p in $section/ancestor-or-self::db5:sect1
 	let $nodeId := util:node-id($s)
 	let $uri :=
 		util:document-name(root($s)) || "?" || $search-params || "&amp;id=D" || $nodeId || "#D" || $nodeId
 	return
-		(" > ", <a href="{$uri}">{$s/title/text()}</a>)
+		(" > ", <a href="{$uri}">{$s/db5:title/text()}</a>)
 };
 
 (:~
@@ -136,18 +137,18 @@ declare %private function dq:print-results($hits as element()*, $search-params a
 			}
 		</div>
 };
-
+(: TODO this needs a do over there is no more section but sect1 | sect2 | sect3  :)
 declare %public function dq:do-query($context as node()*, $query as xs:string, $field as xs:string) {
     if (count($context) > 1) then
         switch ($field)
             case "title" return
-                $context//section[ft:query(.//title, $query)]
+                $context//db5:sect1[ft:query(.//db5:title, $query)]
             default return
-                $context//section[ft:query(.//title, $query)] | $context//section[ft:query(., $query)][not(section)]
+                $context/db5:sect1[ft:query(.//db5:title, $query)] | $context//db5:sect1[ft:query(., $query)][not(db5:sect1)]
     else
         switch ($field)
             case "title" return
-                $context[.//section[ft:query(.//title, $query)]]
+                $context[.//db5:sect1[ft:query(.//db5:title, $query)]]
             default return
-                $context[.//section[ft:query(.//title, $query)] or .//section[ft:query(., $query)][not(section)]]
+                $context[.//db5:sect1[ft:query(.//db5:title, $query)] or .//db5:sect1[ft:query(., $query)][not(db5:sect1)]]
 };

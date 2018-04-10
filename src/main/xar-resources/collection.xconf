@@ -1,21 +1,17 @@
 <collection xmlns="http://exist-db.org/collection-config/1.0">
-    <index>
-        <fulltext default="none" attributes="false"/>
+    <index xmlns:db5="http://docbook.org/ns/docbook" xmlns:xs="http://www.w3.org/2001/XMLSchema">
         <lucene>
             <analyzer class="org.apache.lucene.analysis.standard.StandardAnalyzer"/>
-            <text qname="section">
-                <ignore qname="title"/>
-                <ignore qname="programlisting"/>
-                <ignore qname="screen"/>
-                <ignore qname="synopsis"/>
+            <text qname="db5:article">
+                <ignore qname="db5:info"/>
+                <ignore qname="db5:programlisting"/>
+                <ignore qname="db5:screen"/>
+                <ignore qname="db5:synopsis"/>
             </text>
-            <text qname="title" boost="2.0"/>
-        </lucene>
-        <lucene>
-            <analyzer class="org.apache.lucene.analysis.standard.StandardAnalyzer"/>
-            <text qname="para"/>
-            <text qname="title" boost="2.0"/>
-            <ignore qname="title"/>
+            <text qname="db5:title" boost="2.0"/>
+            <text qname="db5:para"/>
+            <ignore qname="db5:title"/>
+            <inline qname="db5:emphasis"/>
         </lucene>
     </index>
 </collection>
